@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/bclokie/tinyapp/issues"
   },
-  "homepage": "https://github.com/bclokie/tinyapp#readme"
+  "homepage": "https://github.com/bclokie/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
