@@ -71,13 +71,20 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-//Login feature
+//Login & Logout Feature
 
 app.post("/login", (req, res) => {
   console.log(req.body.username);
   const username = req.body.username;
 
   res.cookie('name', username);
+  res.redirect('/urls');
+});
+
+app.post("/logout", (req, res) => {
+  const username = req.body.username;
+
+  res.clearCookie('name', username)
   res.redirect('/urls');
 });
 
