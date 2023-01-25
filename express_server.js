@@ -13,6 +13,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  user1: {
+    id: "user1",
+    email: "user1@gmail.com",
+    password: "password",
+  },
+  user2: {
+    id: "user2",
+    email: "user2@hotmail.com",
+    password: "abc123",
+  },
+};
+
 const generateRandomString = () => {
   let string = '';
   const cipher = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
