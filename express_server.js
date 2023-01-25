@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser')
+const morgan = require('morgan')
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -23,17 +24,16 @@ const generateRandomString = () => {
   return string;
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id]; 
   res.redirect(`/urls`);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+app.post("/urls/:id/edit", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls`);
 });
 
  app.get("/urls", (req, res) => {
@@ -71,7 +71,25 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-//Login & Logout Feature
+//Not working yet
+app.get("/register", (req, res) => {
+//  const templateVars = { username: req.cookies["username"] }; 
+  res.render("user_registration"/*, templateVars*/);
+});
+
+app.post("/register", (req, res) => {
+  let userId = generateRandomString();
+  users[userId] = {
+    id: userId,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie("user_id", userId);
+  console.log(users);
+  res.redirect(`/urls`);
+});
+
+//Login & Logout Feature (Cookies)
 
 app.post("/login", (req, res) => {
   console.log(req.body.username);
