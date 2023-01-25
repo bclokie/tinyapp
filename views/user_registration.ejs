@@ -6,6 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
+
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -13,9 +14,13 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+
     <title>Register - TinyApp</title>
   </head>
+
   <body>
+    <%- include('partials/_header') %>
+
     <main style="margin: 1em;">
       <h3>User Registration</h3>
       <form action="/register" method="POST">
@@ -29,7 +34,7 @@
             style="width: 300px; margin: 0.5em">
         </div>
         <div class="form-group mb-2">
-          <label for="email">Password:</label>
+          <label for="password">Password:</label>
           <input
             class="form-control"
             type="password"
@@ -59,5 +64,4 @@
     ></script>
   </body>
 </html>
-
 

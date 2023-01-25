@@ -1,44 +1,85 @@
+//////////// APP REQUIRES/VARIABLES/ETC 
 const express = require("express");
+const morgan = require('morgan');
+const cookieParser = require("cookie-parser");
+const generateRandomString = () => {return Math.random().toString(36).substring(2, 8);};
 const app = express();
 const PORT = 8080; // default port 8080
-const cookieParser = require('cookie-parser')
-const morgan = require('morgan')
 
 app.set("view engine", "ejs");
+
+//////////// APPS TO USE 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(morgan('dev'));
 
+//////////// DATA SOURCES 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
 const users = {
-  user1: {
-    id: "user1",
-    email: "user1@gmail.com",
-    password: "password",
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
   },
-  user2: {
-    id: "user2",
-    email: "user2@hotmail.com",
-    password: "abc123",
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
   },
 };
 
-const generateRandomString = () => {
-  let string = '';
-  const cipher = '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let i = 0;
-  while (i < 6) {
-    string += cipher.charAt(Math.floor(Math.random() * cipher.length));
-    i++;
-  }
-  return string;
-};
+//////////// EXAMPLE/TEMP ROUTES 
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+//////////// URL ROUTES 
+app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  
+  const templateVars = { urls: urlDatabase, user };
+  res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  
+  const templateVars = { user };
+  res.render("urls_new", templateVars);
+});
+
+app.get("/urls/:id", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user };
+  res.render("urls_show", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString();
+  const longURL = req.body.longURL;
+  urlDatabase[shortURL] = longURL;
+  // console.log(urlDatabase);
+  res.redirect(`/urls/${shortURL}`);
+});
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id]; 
+  delete urlDatabase[req.params.id];
   res.redirect(`/urls`);
 });
 
@@ -49,78 +90,58 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect(`/urls`);
 });
 
- app.get("/urls", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    username: req.cookies,
-  };
-  res.render("urls_index", templateVars);
-});
+//////////// USER REGISTRATION HANDLER ROUTES 
+// no post route yet, this get is just to render the new template
 
-app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    username: req.cookies,
-  }
-  res.render("urls_new", templateVars);
-});
-
-app.get("/urls/:id", (req, res) => {
-  const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    username: req.cookies,
-  };
-  res.render("urls_show", templateVars);
-});
-
-app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`urls/${shortURL}`);
-});
-
-app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
-});
-
-//Not working yet
 app.get("/register", (req, res) => {
-//  const templateVars = { username: req.cookies["username"] }; 
-  res.render("user_registration"/*, templateVars*/);
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+
+  // const templateVars = ; // I actually only need one...
+  console.log(req.cookies["user_id"]);
+  res.render("user_registration", { user });
 });
 
 app.post("/register", (req, res) => {
-  let userId = generateRandomString();
-  users[userId] = {
+ 
+  const userId = generateRandomString();
+  
+  const user = {
     id: userId,
     email: req.body.email,
     password: req.body.password
   }
+
+  users[userId] = user;
+
   res.cookie("user_id", userId);
-  console.log(users);
+
+  console.log("entire users object:\n", users);
+  console.log("just user email:\n", user.email);
+
+  res.redirect(`/urls`);
+
+});
+
+//////////// COOKIE USERNAME ROUTES 
+app.post("/login", (req, res) => {
+  res.cookie("user_id", req.body.user_id);
   res.redirect(`/urls`);
 });
 
-//Login & Logout Feature (Cookies)
-
-app.post("/login", (req, res) => {
-  console.log(req.body.username);
-  const username = req.body.username;
-
-  res.cookie('name', username);
-  res.redirect('/urls');
-});
-
 app.post("/logout", (req, res) => {
-  const username = req.body.username;
-
-  res.clearCookie('name', username)
-  res.redirect('/urls');
+  res.clearCookie("user_id", req.body.user_id);
+  res.redirect(`/urls`);
 });
 
-//Will log once the server starts
+//////////// U/:ID ROUTES
+// in case this happens again, if you don't use "http://" then there may be a cookies bug
+app.get("/u/:id", (req, res) => {
+  const longURL = `${urlDatabase[req.params.id]}`;
+  res.redirect(longURL);
+});
 
+//////////// PORT LISTENER 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
