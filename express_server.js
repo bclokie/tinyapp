@@ -70,7 +70,7 @@ app.post("/urls", (req, res) => {
   if (!user) { return res.status(400).send("Please login or register to create short URLs!") }
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL, userID: userId };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -108,17 +108,12 @@ app.post("/register", (req, res) => {
       return res.status(400).send("Account exists. Please login or register with a new email.");
     }
   };
-
   const userId = generateRandomString();
   const user = { id: userId, email: req.body.email, password: req.body.password };
-
   users[userId] = user;
-
   res.cookie("user_id", userId);
-
-  console.log("entire users object:\n", users);
-  console.log("just user email:\n", user.email);
-
+  console.log("Users Object:\n", users);
+  console.log("User Email:\n", user.email);
   res.redirect(`/urls`);
 
 });
@@ -163,3 +158,12 @@ app.get("/u/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+/*
+
+           _   
+       .__(.)< (MEOW)
+        \___)
+ ~~~~~~~~~~~~~~~~~~-->
+ 
+ */
