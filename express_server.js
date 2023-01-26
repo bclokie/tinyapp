@@ -2,6 +2,7 @@
 const express = require("express");
 const morgan = require('morgan');
 const cookieParser = require("cookie-parser");
+const bcrypt = require('bcryptjs')
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -57,6 +58,15 @@ const urlsForUser = (userID) => {
   }
   return filteredURLS;
 };
+
+const getUserByEmail = (email, users) => {
+  for (const userID in users) {
+   if (users[userID].email === email) {
+     return userID;
+   }
+  }
+  return
+}
 
 //  URL ROUTES  // 
 
@@ -139,21 +149,22 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   let email = req.body.email;
   // If no email or password return error 400 
+  let password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (!req.body.email || !req.body.password) {
     return res.status(400).send("One or more fields left empty.");
   }
   // If already registered return error 400
-  for (const user in users) {
-    if (users[user].email === email) {
-      return res.status(400).send("Account exists. Please login or register with a new email.");
-    }
-  };
+  const userID = getUserByEmail(email, users);
+  if (userID) {
+    return res.status(400).send("Account exists. Please login or register with a new email.");
+  }
   const userId = generateRandomString();
-  const user = { id: userId, email: req.body.email, password: req.body.password };
+  const user = { id: userId, email: req.body.email, password: hashedPassword };
   users[userId] = user;
   res.cookie("user_id", userId);
- // console.log("Users Object:\n", users);
- // console.log("User Email:\n", user.email);
+  console.log("Users Object:\n", users);
+  console.log("User Hashed Password:\n", user.hashedPassword);
   res.redirect(`/urls`);
 
 });
