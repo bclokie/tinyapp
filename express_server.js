@@ -14,9 +14,16 @@ app.use(morgan('dev'));
 
 //   DATA & OBJECTS   // 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
+
 
 const users = {
   userRandomID: {
@@ -25,7 +32,7 @@ const users = {
     password: "purple-monkey-dinosaur",
   },
   user2RandomID: {
-    id: "user2RandomID",
+    id: "aJ48lW",
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
@@ -52,8 +59,8 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], user };
+  const shortURL = req.params.id;
+  const templateVars = { id: shortURL, longURL: urlDatabase[shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
 
@@ -147,7 +154,7 @@ app.post("/logout", (req, res) => {
 //  U/:ID   //
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   if (!longURL) { return res.status(400).send("Short URL does not exist"); }
   res.redirect(longURL);
 });
