@@ -1,4 +1,4 @@
-//  APP REQUIREMENTS  // 
+//   APP REQUIREMENTS   // 
 const express = require("express");
 const morgan = require('morgan');
 const cookieParser = require("cookie-parser");
@@ -6,13 +6,13 @@ const generateRandomString = () => {return Math.random().toString(36).substring(
 const app = express();
 const PORT = 8080; // default port 8080
 
-//  APPS  //
+//   APPS   //
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-//  DATA & OBJECTS  // 
+//   DATA & OBJECTS   // 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
