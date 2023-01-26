@@ -1,8 +1,8 @@
-//   APP REQUIREMENTS   // 
+//   APP REQUIREMENTS   //
 const express = require("express");
 const morgan = require('morgan');
 const cookieParser = require("cookie-parser");
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-//   DATA & OBJECTS   // 
+//   DATA & OBJECTS   //
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -29,11 +29,13 @@ const users = {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur",
+    hashedPassword: "$2a$10$m.wSGYM8yqPAxtBMNOSsIeQTshfu1V5hHkb1mcTR6/gPiEz0eYR9e"
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk",
+    hashedPassword: "$2a$10$XzFtBBH7jtIhZuzZBfjHSeMg.cqa0vhSq9ZTR8ZCa3i5in563mqku"
   },
 };
 
@@ -61,20 +63,22 @@ const urlsForUser = (userID) => {
 
 const getUserByEmail = (email, users) => {
   for (const userID in users) {
-   if (users[userID].email === email) {
-     return userID;
-   }
+    if (users[userID].email === email) {
+      return userID;
+    }
   }
-  return
-}
+  return;
+};
 
-//  URL ROUTES  // 
+//  URL ROUTES  //
 
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
   const templateVars = { urls: urlsForUser(userId), user };
-  if (!user) { return res.status(400).send("Please login or register to view your short URLs."); }
+  if (!user) {
+    return res.status(400).send("Please login or register to view your short URLs.");
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -89,10 +93,16 @@ app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
   const shortURL = req.params.id;
-  if (!urlDatabase.hasOwnProperty(shortURL)) { return res.status(400).send("This URL does not exist."); }
-  if (!req.cookies["user_id"]) { return res.status(400).send("Please login to view this short URL.");  }
-  if (!urlsForUser(userId).hasOwnProperty(shortURL)) { return res.status(400).send("You are not authorized to view this link.") }
-  const longURL = urlDatabase[shortURL].longURL
+  if (!urlDatabase.hasOwnProperty(shortURL)) {
+    return res.status(400).send("This URL does not exist.");
+  }
+  if (!req.cookies["user_id"]) {
+    return res.status(400).send("Please login to view this short URL.");
+  }
+  if (!urlsForUser(userId).hasOwnProperty(shortURL)) {
+    return res.status(400).send("You are not authorized to view this link.");
+  }
+  const longURL = urlDatabase[shortURL].longURL;
   const templateVars = { id: shortURL, longURL: longURL, userID: userId, user: user };
   res.render("urls_show", templateVars);
 });
@@ -100,56 +110,74 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL].longURL;
-  if (!longURL) { return res.status(400).send("Short URL does not exist"); }
+  if (!longURL) {
+    return res.status(400).send("Short URL does not exist");
+  }
   res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  if (!user) { return res.status(400).send("Please login or register to create short URLs!") }
+  if (!user) {
+    return res.status(400).send("Please login or register to create short URLs!");
+  }
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = { longURL, userID: userId };
-//  console.log("User creating url:\n", userId);
-//  console.log("Object added:\n", urlDatabase[shortURL]);
-//  console.log("urlDatabase object:\n", urlDatabase);
+  //  console.log("User creating url:\n", userId);
+  //  console.log("Object added:\n", urlDatabase[shortURL]);
+  //  console.log("urlDatabase object:\n", urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  if (!urlDatabase.hasOwnProperty(shortURL)) { return res.status(400).send("This URL does not exist."); }
-  if (!req.cookies["user_id"]) { return res.status(400).send("Please login to view this short URL."); }
-  if (!urlsForUser(userId).hasOwnProperty(shortURL)) { return res.status(400).send("You are not authorized to view this link.") }
+  if (!urlDatabase.hasOwnProperty(shortURL)) {
+    return res.status(400).send("This URL does not exist.");
+  }
+  if (!req.cookies["user_id"]) {
+    return res.status(400).send("Please login to view this short URL.");
+  }
+  if (!urlsForUser(userId).hasOwnProperty(shortURL)) {
+    return res.status(400).send("You are not authorized to view this link.");
+  }
   delete urlDatabase[req.params.id];
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
-  const userId = req.cookies["user_id"]
-  if (!urlDatabase.hasOwnProperty(shortURL)) { return res.status(400).send("This URL does not exist."); }
-  if (!req.cookies["user_id"]) { return res.status(400).send("Please login to view this short URL.");  }
-  if (!urlsForUser(userId).hasOwnProperty(shortURL)) { return res.status(400).send("You are not authorized to view this link.") }
+  const userId = req.cookies["user_id"];
+  if (!urlDatabase.hasOwnProperty(shortURL)) {
+    return res.status(400).send("This URL does not exist.");
+  }
+  if (!req.cookies["user_id"]) {
+    return res.status(400).send("Please login to view this short URL.");
+  }
+  if (!urlsForUser(userId).hasOwnProperty(shortURL)) {
+    return res.status(400).send("You are not authorized to view this link.");
+  }
   const shortURL = req.params.id;
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls`);
 });
 
-//  USER REGISTRATION   // 
+//  USER REGISTRATION   //
 
 app.get("/register", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  if (user) { return res.redirect(`/urls`); }
+  if (user) {
+    return res.redirect(`/urls`);
+  }
   console.log(req.cookies["user_id"]);
   res.render("user_registration", { user });
 });
 
 app.post("/register", (req, res) => {
-  let email = req.body.email;
-  // If no email or password return error 400 
-  let password = req.body.password;
+  const email = req.body.email;
+  // If no email or password return error 400
+  const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
   if (!req.body.email || !req.body.password) {
     return res.status(400).send("One or more fields left empty.");
@@ -169,27 +197,28 @@ app.post("/register", (req, res) => {
 
 });
 
-//  LOGIN   // 
+//  LOGIN   //
 app.get("/login", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  if (user) { return res.redirect(`/urls`); }
+  if (user) {
+    return res.redirect(`/urls`);
+  }
   res.render("user_login", { user });
 });
 
 app.post("/login", (req, res) => {
-  let email = req.body.email;
-  let password = req.body.password;
-  for (const user in users) {
-    if (users[user].email === email) {
-      if (users[user].password === password) {
-        res.cookie("user_id", users[user].id);
-        return res.redirect(`/urls`);
-      } 
-      return res.status(403).send("Incorrect Password")
+  const email = req.body.email;
+  const password = req.body.password;
+  const userID = getUserByEmail(email, users);
+  if (userID) {
+    if (bcrypt.compareSync(password, users[userID].hashedPassword)) {
+      res.cookie("user_id", users[userID].id);
+      return res.redirect(`/urls`);
     }
-  };
-  return res.status(403).send("403 - Account Does Not Exist")
+    return res.status(403).send("Incorrect Password");
+  }
+  return res.status(403).send("403 - Account Does Not Exist");
 });
 
 app.post("/logout", (req, res) => {
@@ -197,14 +226,14 @@ app.post("/logout", (req, res) => {
   res.redirect(`/login`);
 });
 
-//  PORT LOG  //  
+//  PORT LOG  //
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 /* DUCK?
 
-           _   
+           _
        .__(.)< (MEOW)
         \___)
  ~~~~~~~~~~~~~~~~~~-->
