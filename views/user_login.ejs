@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -8,41 +14,38 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL - TinyApp Example</title>
+
+    <title>Login - TinyApp</title>
   </head>
 
   <body>
+    <%- include('partials/_header') %>
 
-    <header>
-      <%- include('./partials/_header'); %>
-    </header>
-
-    <div class="card text-center">
-      <div class="card-header"></div>
-      <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
-        </p>
-      </div>
-      <div class="card-footer text-muted">
-        <h3>Edit</h3>
-        <form class="form-inline justify-content-center" action="/urls/<%= id %>/edit" method="POST">
-          <div class="form-group mb-2">
-            <label for="longURL">New URL:</label>
-            <input
-              class="form-control"
-              type="text"
-              name="longURL"
-              placeholder="http://"
-              style="width: 200px; margin: 0.5em"
-            />
+    <main style="margin: 1em;">
+      <h3>Existing User Login</h3>
+      <form action="/login" method="POST">
+        <div class="form-group mb-2">
+          <label for="email">Email:</label>
+          <input
+            class="form-control"
+            type="email"
+            name="email"
+            placeholder="email@address.com"
+            style="width: 300px; margin: 0.5em">
+        </div>
+        <div class="form-group mb-2">
+          <label for="password">Password:</label>
+          <input
+            class="form-control"
+            type="password"
+            name="password"
+            placeholder="********"
+            style="width: 300px; margin: 0.5em">
+        </div>
             <button type="submit" class="btn btn-primary">Submit</button>
-          </div>
+          </div>      
         </form>
-      </div>        
-
-    </div>
+    </main>
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
