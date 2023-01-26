@@ -2,7 +2,6 @@
 const express = require("express");
 const morgan = require('morgan');
 const cookieParser = require("cookie-parser");
-const generateRandomString = () => {return Math.random().toString(36).substring(2, 8);};
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -24,7 +23,6 @@ const urlDatabase = {
   },
 };
 
-
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -32,26 +30,47 @@ const users = {
     password: "purple-monkey-dinosaur",
   },
   user2RandomID: {
-    id: "aJ48lW",
+    id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
 };
 
+// FUNCTIONS //
+
+const generateRandomString = () => {
+  let string = "";
+  const cipher = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let i = 0;
+  while (i < 6) {
+    string += cipher.charAt(Math.floor(Math.random() * cipher.length));
+    i++;
+  }
+};
+
+const urlsForUser = (userID) => {
+  const filteredURLS = {};
+  for (let shortURL in urlDatabase) {
+    if (userID === urlDatabase[shortURL].userID) {
+      filteredURLS[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return filteredURLS;
+};
+
 //  URL ROUTES  // 
+
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  
-  const templateVars = { urls: urlDatabase, user };
-  if (!user) { res.redirect(`/login`); }
+  const templateVars = { urls: urlsForUser(userId), user };
+  if (!user) { return res.status(400).send("Please login or register to view your short URLs."); }
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-  
   const templateVars = { user };
   res.render("urls_new", templateVars);
 });
@@ -60,8 +79,19 @@ app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
   const shortURL = req.params.id;
-  const templateVars = { id: shortURL, longURL: urlDatabase[shortURL].longURL, user };
+  if (!urlDatabase.hasOwnProperty(shortURL)) { return res.status(400).send("This URL does not exist."); }
+  if (!req.cookies["user_id"]) { return res.status(400).send("Please login to view this short URL.");  }
+  if (!urlsForUser(userId).hasOwnProperty(shortURL)) { return res.status(400).send("You are not authorized to view this link.") }
+  const longURL = urlDatabase[shortURL].longURL
+  const templateVars = { id: shortURL, longURL: longURL, userID: userId, user: user };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL].longURL;
+  if (!longURL) { return res.status(400).send("Short URL does not exist"); }
+  res.redirect(longURL);
 });
 
 app.post("/urls", (req, res) => {
@@ -71,18 +101,25 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = { longURL, userID: userId };
-  console.log("User creating url:\n", userId);
-  console.log("Object added:\n", urlDatabase[shortURL]);
-  console.log("urlDatabase object:\n", urlDatabase);
+//  console.log("User creating url:\n", userId);
+//  console.log("Object added:\n", urlDatabase[shortURL]);
+//  console.log("urlDatabase object:\n", urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+  if (!urlDatabase.hasOwnProperty(shortURL)) { return res.status(400).send("This URL does not exist."); }
+  if (!req.cookies["user_id"]) { return res.status(400).send("Please login to view this short URL."); }
+  if (!urlsForUser(userId).hasOwnProperty(shortURL)) { return res.status(400).send("You are not authorized to view this link.") }
   delete urlDatabase[req.params.id];
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:id/edit", (req, res) => {
+  const userId = req.cookies["user_id"]
+  if (!urlDatabase.hasOwnProperty(shortURL)) { return res.status(400).send("This URL does not exist."); }
+  if (!req.cookies["user_id"]) { return res.status(400).send("Please login to view this short URL.");  }
+  if (!urlsForUser(userId).hasOwnProperty(shortURL)) { return res.status(400).send("You are not authorized to view this link.") }
   const shortURL = req.params.id;
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
@@ -149,20 +186,12 @@ app.post("/logout", (req, res) => {
   res.redirect(`/login`);
 });
 
-//  U/:ID   //
-app.get("/u/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL].longURL;
-  if (!longURL) { return res.status(400).send("Short URL does not exist"); }
-  res.redirect(longURL);
-});
-
 //  PORT LOG  //  
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-/*
+/* DUCK?
 
            _   
        .__(.)< (MEOW)
