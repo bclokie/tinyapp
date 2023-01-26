@@ -71,6 +71,9 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = { longURL, userID: userId };
+  console.log("User creating url:\n", userId);
+  console.log("Object added:\n", urlDatabase[shortURL]);
+  console.log("urlDatabase object:\n", urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -112,8 +115,8 @@ app.post("/register", (req, res) => {
   const user = { id: userId, email: req.body.email, password: req.body.password };
   users[userId] = user;
   res.cookie("user_id", userId);
-  console.log("Users Object:\n", users);
-  console.log("User Email:\n", user.email);
+ // console.log("Users Object:\n", users);
+ // console.log("User Email:\n", user.email);
   res.redirect(`/urls`);
 
 });
@@ -165,5 +168,5 @@ app.listen(PORT, () => {
        .__(.)< (MEOW)
         \___)
  ~~~~~~~~~~~~~~~~~~-->
- 
+
  */
