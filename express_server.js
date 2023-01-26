@@ -74,7 +74,6 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
-  // console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -91,41 +90,27 @@ app.post("/urls/:id/edit", (req, res) => {
 });
 
 //////////// USER REGISTRATION HANDLER ROUTES 
-// no post route yet, this get is just to render the new template
 
 app.get("/register", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
-
-  // const templateVars = ; // I actually only need one...
   console.log(req.cookies["user_id"]);
   res.render("user_registration", { user });
 });
 
-app.get("/login", (req, res) => {
-
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
-
-  res.render("user_login", { user });
-
-});
-
 app.post("/register", (req, res) => {
-  // need to add a variable that allows us to see if the email already exists
   let email = req.body.email;
-  // IF there isn't an email/passord we will return the 400 error but with a better description for the user
+  // If no email or passord we will return error 400 
   if (!req.body.email || !req.body.password) {
     return res.status(400).send("One or more fields left empty. Please try again.");
   }
-  // for users that have already registered we can check our users database and return the 400 error if they've already signed up
+  // If already registered, check  users database and return 400 error if already registered
   for (const user in users) {
     if (users[user].email === email) {
       return res.status(400).send("Account exists. Please login.");
     }
   };
 
-  // basically the happy path is that if neither of the above is an issue then the below runs as normal!
   const userId = generateRandomString();
   const user = { id: userId, email: req.body.email, password: req.body.password };
 
@@ -140,10 +125,26 @@ app.post("/register", (req, res) => {
 
 });
 
-//////////// COOKIE USERNAME ROUTES 
+//////////// LOGIN USERNAME ROUTES 
+app.get("/login", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  res.render("user_login", { user });
+});
+
 app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.user_id);
-  res.redirect(`/urls`);
+  let email = req.body.email;
+  let password = req.body.password;
+  for (const user in users) {
+    if (users[user].email === email) {
+      if (users[user].password === password) {
+        res.cookie("user_id", users[user].id);
+        return res.redirect(`/urls`);
+      } 
+      return res.status(403).send("Wrong password entered.")
+    }
+  };
+  return res.status(403).send("403 - an account doesn't exist.")
 });
 
 app.post("/logout", (req, res) => {
@@ -152,7 +153,6 @@ app.post("/logout", (req, res) => {
 });
 
 //////////// U/:ID ROUTES
-// in case this happens again, if you don't use "http://" then there may be a cookies bug
 app.get("/u/:id", (req, res) => {
   const longURL = `${urlDatabase[req.params.id]}`;
   res.redirect(longURL);
