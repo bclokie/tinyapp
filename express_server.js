@@ -37,6 +37,7 @@ app.get("/urls", (req, res) => {
   const user = users[userId];
   
   const templateVars = { urls: urlDatabase, user };
+  if (!user) { res.redirect(`/login`); }
   res.render("urls_index", templateVars);
 });
 
@@ -57,6 +58,9 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  const userId = req.cookies["user_id"];
+  const user = users[userId];
+  if (!user) { return res.status(400).send("Please login or register to create short URLs!") }
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
@@ -142,7 +146,9 @@ app.post("/logout", (req, res) => {
 
 //  U/:ID   //
 app.get("/u/:id", (req, res) => {
-  const longURL = `${urlDatabase[req.params.id]}`;
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
+  if (!longURL) { return res.status(400).send("Short URL does not exist"); }
   res.redirect(longURL);
 });
 
