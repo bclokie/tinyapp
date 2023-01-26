@@ -12,21 +12,17 @@
       </div>
     </div>
     <% if (!user) { %>
-      <div>
-        <a href="/login">Login</a> &nbsp;
+      <div class="navbar-nav">
+        <a class="nav-item nav-link" href="/login">Login</a>
+        <a class="nav-item nav-link" href="/register">Register</a>
       </div>
-      <div>
-        <a href="/register">Register</a>
+    <% } else { %>
+      <div class="navbar-nav">
+        <span class="nav-item nav-link" style="margin: 0.5em">Logged in as: <%= user.email %>!</span>
+        <form class="form-inline" action="/logout" method="post">
+          <button class="btn btn-outline-dark" type="submit">Logout</button>
+        </form>
       </div>
-      <% } else { %>
-        <div>
-          Logged in as: <%= user.email %> &nbsp;
-        </div>
-        <div>
-          <form action="/logout" method="post">
-            <button type="submit" class="btn btn-outline-dark">Logout</button>
-          </form>
-        </div>
-        <% } %>
+    <% } %>
   </nav>
 </header>
