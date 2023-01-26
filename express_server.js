@@ -1,4 +1,4 @@
-//////////// APP REQUIRES/VARIABLES/ETC 
+//  APP REQUIREMENTS  // 
 const express = require("express");
 const morgan = require('morgan');
 const cookieParser = require("cookie-parser");
@@ -6,14 +6,13 @@ const generateRandomString = () => {return Math.random().toString(36).substring(
 const app = express();
 const PORT = 8080; // default port 8080
 
+//  APPS  //
 app.set("view engine", "ejs");
-
-//////////// APPS TO USE 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-//////////// DATA SOURCES 
+//  DATA & OBJECTS  // 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -32,7 +31,7 @@ const users = {
   },
 };
 
-//////////// URL ROUTES 
+//  URL ROUTES  // 
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
@@ -76,25 +75,26 @@ app.post("/urls/:id/edit", (req, res) => {
   res.redirect(`/urls`);
 });
 
-//////////// USER REGISTRATION HANDLER ROUTES 
+//  USER REGISTRATION   // 
 
 app.get("/register", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
+  if (user) { return res.redirect(`/urls`); }
   console.log(req.cookies["user_id"]);
   res.render("user_registration", { user });
 });
 
 app.post("/register", (req, res) => {
   let email = req.body.email;
-  // If no email or passord we will return error 400 
+  // If no email or password return error 400 
   if (!req.body.email || !req.body.password) {
-    return res.status(400).send("One or more fields left empty. Please try again.");
+    return res.status(400).send("One or more fields left empty.");
   }
-  // If already registered, check  users database and return 400 error if already registered
+  // If already registered return error 400
   for (const user in users) {
     if (users[user].email === email) {
-      return res.status(400).send("Account exists. Please login.");
+      return res.status(400).send("Account exists. Please login or register with a new email.");
     }
   };
 
@@ -112,10 +112,11 @@ app.post("/register", (req, res) => {
 
 });
 
-//////////// LOGIN USERNAME ROUTES 
+//  LOGIN   // 
 app.get("/login", (req, res) => {
   const userId = req.cookies["user_id"];
   const user = users[userId];
+  if (user) { return res.redirect(`/urls`); }
   res.render("user_login", { user });
 });
 
@@ -128,10 +129,10 @@ app.post("/login", (req, res) => {
         res.cookie("user_id", users[user].id);
         return res.redirect(`/urls`);
       } 
-      return res.status(403).send("Wrong password entered.")
+      return res.status(403).send("Incorrect Password")
     }
   };
-  return res.status(403).send("403 - an account doesn't exist.")
+  return res.status(403).send("403 - Account Does Not Exist")
 });
 
 app.post("/logout", (req, res) => {
@@ -139,13 +140,13 @@ app.post("/logout", (req, res) => {
   res.redirect(`/login`);
 });
 
-//////////// U/:ID ROUTES
+//  U/:ID   //
 app.get("/u/:id", (req, res) => {
   const longURL = `${urlDatabase[req.params.id]}`;
   res.redirect(longURL);
 });
 
-//////////// PORT LISTENER 
+//  PORT LOG  //  
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
