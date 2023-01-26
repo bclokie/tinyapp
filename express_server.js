@@ -49,6 +49,7 @@ const generateRandomString = () => {
     string += cipher.charAt(Math.floor(Math.random() * cipher.length));
     i++;
   }
+  return string
 };
 
 const urlsForUser = (userID) => {
@@ -221,8 +222,9 @@ app.post("/login", (req, res) => {
   return res.status(403).send("403 - Account Does Not Exist");
 });
 
+//  LOGOUT  //
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id", req.body.user_id);
+  res.clearCookie("user_id");
   res.redirect(`/login`);
 });
 
