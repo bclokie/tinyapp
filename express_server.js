@@ -32,6 +32,7 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
+    password:"purple-monkey-dinosaur",
     hashedPassword: "$2a$10$m.wSGYM8yqPAxtBMNOSsIeQTshfu1V5hHkb1mcTR6/gPiEz0eYR9e",
 //    unhashedPassword: "purple-monkey-dinosaur"
   },
@@ -143,6 +144,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls/:id/edit", (req, res) => {
   const userId = req.session["user_id"];
+  const shortURL = req.params.id;
   if (!urlDatabase.hasOwnProperty(shortURL)) {
     return res.status(400).send("This URL does not exist.");
   }
@@ -152,9 +154,8 @@ app.post("/urls/:id/edit", (req, res) => {
   if (!urlsForUser(userId).hasOwnProperty(shortURL)) {
     return res.status(400).send("You are not authorized to view this link.");
   }
-  const shortURL = req.params.id;
   const longURL = req.body.longURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
   res.redirect(`/urls`);
 });
 
