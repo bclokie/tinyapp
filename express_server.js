@@ -1,10 +1,11 @@
 //   APP REQUIREMENTS   //
 const express = require("express");
+const app = express();
+const PORT = 8080; // default port 8080
 const morgan = require('morgan');
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcryptjs');
-const app = express();
-const PORT = 8080; // default port 8080
+const { getUserByEmail } = require("./helpers")
 
 //   APPS   //
 app.set("view engine", "ejs");
@@ -63,15 +64,6 @@ const urlsForUser = (userID) => {
     }
   }
   return filteredURLS;
-};
-
-const getUserByEmail = (email, users) => {
-  for (const userID in users) {
-    if (users[userID].email === email) {
-      return userID;
-    }
-  }
-  return;
 };
 
 //  URL ROUTES  //
