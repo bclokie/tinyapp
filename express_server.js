@@ -1,11 +1,11 @@
 //   APP REQUIREMENTS   //
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080; 
 const morgan = require('morgan');
 const cookieSession = require("cookie-session");
 const bcrypt = require('bcryptjs');
-const { getUserByEmail } = require("./helpers")
+const { getUserByEmail } = require("./helpers");
 
 //   APPS   //
 app.set("view engine", "ejs");
@@ -32,13 +32,13 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "$2a$10$m.wSGYM8yqPAxtBMNOSsIeQTshfu1V5hHkb1mcTR6/gPiEz0eYR9e",
+    hashedPassword: "$2a$10$m.wSGYM8yqPAxtBMNOSsIeQTshfu1V5hHkb1mcTR6/gPiEz0eYR9e",
 //    unhashedPassword: "purple-monkey-dinosaur"
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "$2a$10$XzFtBBH7jtIhZuzZBfjHSeMg.cqa0vhSq9ZTR8ZCa3i5in563mqku",
+    hashedPassword: "$2a$10$XzFtBBH7jtIhZuzZBfjHSeMg.cqa0vhSq9ZTR8ZCa3i5in563mqku",
 //    unhashedPassword: "dishwasher-funk"
   },
 };
@@ -186,11 +186,10 @@ app.post("/register", (req, res) => {
   const userId = generateRandomString();
   const user = { id: userId, email: req.body.email, password: hashedPassword };
   users[userId] = user;
-  res.session.user_id = userId;
+  req.session.user_id = userId;
   console.log("Users Object:\n", users);
   console.log("User Hashed Password:\n", user.hashedPassword);
   res.redirect(`/urls`);
-
 });
 
 //  LOGIN   //
@@ -204,17 +203,17 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  let email = req.body.email;
+  let password = req.body.password;
   const userID = getUserByEmail(email, users);
   if (userID) {
     if (bcrypt.compareSync(password, users[userID].hashedPassword)) {
-      res.session.user_id = users[userID].id;
+      req.session.user_id = users[userID].id;
       return res.redirect(`/urls`);
     }
-    return res.status(403).send("Incorrect Password");
+    return res.status(403).send("Wrong password entered.");
   }
-  return res.status(403).send("403 - Account Does Not Exist");
+  return res.status(403).send("403 - an account doesn't exist.");
 });
 
 //  LOGOUT  //
