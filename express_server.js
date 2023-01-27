@@ -194,7 +194,7 @@ app.post("/register", (req, res) => {
   const userId = generateRandomString();
   const user = { id: userId, email: req.body.email, password: hashedPassword };
   users[userId] = user;
-  res.session("user_id", userId);
+  res.session.user_id = userId;
   console.log("Users Object:\n", users);
   console.log("User Hashed Password:\n", user.hashedPassword);
   res.redirect(`/urls`);
@@ -217,7 +217,7 @@ app.post("/login", (req, res) => {
   const userID = getUserByEmail(email, users);
   if (userID) {
     if (bcrypt.compareSync(password, users[userID].hashedPassword)) {
-      res.session("user_id", users[userID].id);
+      res.session.user_id = users[userID].id;
       return res.redirect(`/urls`);
     }
     return res.status(403).send("Incorrect Password");
