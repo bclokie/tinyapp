@@ -1,7 +1,7 @@
 //   APP REQUIREMENTS   //
 const express = require("express");
 const morgan = require('morgan');
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -9,7 +9,7 @@ const PORT = 8080; // default port 8080
 //   APPS   //
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession());
 app.use(morgan('dev'));
 
 //   DATA & OBJECTS   //
@@ -28,14 +28,14 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-    hashedPassword: "$2a$10$m.wSGYM8yqPAxtBMNOSsIeQTshfu1V5hHkb1mcTR6/gPiEz0eYR9e"
+    password: "$2a$10$m.wSGYM8yqPAxtBMNOSsIeQTshfu1V5hHkb1mcTR6/gPiEz0eYR9e",
+//    unhashedPassword: "purple-monkey-dinosaur"
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
-    hashedPassword: "$2a$10$XzFtBBH7jtIhZuzZBfjHSeMg.cqa0vhSq9ZTR8ZCa3i5in563mqku"
+    password: "$2a$10$XzFtBBH7jtIhZuzZBfjHSeMg.cqa0vhSq9ZTR8ZCa3i5in563mqku",
+//    unhashedPassword: "dishwasher-funk"
   },
 };
 
